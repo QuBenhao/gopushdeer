@@ -98,7 +98,7 @@ func (gpd *GoPushDeer) request(requestUrl string) error {
 	return nil
 }
 
-func (gpd *GoPushDeer) SendText(text string) error {
+func (gpd *GoPushDeer) SendText(text string, optional ...string) error {
 	base, err := url.Parse(gpd.Server)
 	if err != nil {
 		return err
@@ -107,6 +107,46 @@ func (gpd *GoPushDeer) SendText(text string) error {
 	params := url.Values{}
 	params.Add("pushkey", gpd.Key)
 	params.Add("text", text)
+	if len(optional) > 0 {
+		params.Add("desp", optional[0])
+	}
+	base.RawQuery = params.Encode()
+
+	return gpd.request(base.String())
+}
+
+func (gpd *GoPushDeer) SendImage(imageUrl string, optional ...string) error {
+	base, err := url.Parse(gpd.Server)
+	if err != nil {
+		return err
+	}
+	base.Path += "/message/push"
+	params := url.Values{}
+	params.Add("pushkey", gpd.Key)
+	params.Add("text", imageUrl)
+	params.Add("type", "image")
+	if len(optional) > 0 {
+		params.Add("desp", optional[0])
+	}
+	base.RawQuery = params.Encode()
+
+	return gpd.request(base.String())
+}
+
+func (gpd *GoPushDeer) SendMarkdown(md string, optional ...string) error {
+	//	https://api2.pushdeer.com/message/push?pushkey=<key>&text=标题&desp=<markdown>&type=markdown
+	base, err := url.Parse(gpd.Server)
+	if err != nil {
+		return err
+	}
+	base.Path += "/message/push"
+	params := url.Values{}
+	params.Add("pushkey", gpd.Key)
+	params.Add("text", md)
+	params.Add("type", "markdown")
+	if len(optional) > 0 {
+		params.Add("desp", optional[0])
+	}
 	base.RawQuery = params.Encode()
 
 	return gpd.request(base.String())
