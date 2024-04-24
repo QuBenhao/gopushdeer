@@ -10,9 +10,9 @@ func TestBasicSendText(t *testing.T) {
 	gpd, err := NewGoPushDeer("key")
 	assert.Nil(t, err)
 	assert.NotNil(t, gpd)
-	sendErr := gpd.sendText("hello world")
+	sendErr := gpd.SendText("hello world")
 	assert.Nil(t, sendErr)
-	sendErr = gpd.sendText("")
+	sendErr = gpd.SendText("")
 	assert.NotNil(t, sendErr)
 	fmt.Println(sendErr.Error())
 }
@@ -21,6 +21,6 @@ func TestServerSendText(t *testing.T) {
 	gpd, err := NewGoPushDeerServer("server", "key")
 	assert.Nil(t, err)
 	assert.NotNil(t, gpd)
-	sendErr := gpd.sendText("hello world")
+	sendErr := gpd.SendText("hello world")
 	assert.Nil(t, sendErr)
 }

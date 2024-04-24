@@ -53,9 +53,7 @@ func NewGoPushDeerServer(server, key string) (*GoPushDeer, error) {
 	}, nil
 }
 
-func (gpd *GoPushDeer) sendText(text string) error {
-	encodedText := url.QueryEscape(text)
-	requestUrl := fmt.Sprintf("%s/message/push?pushkey=%s&text=%s", gpd.Server, gpd.Key, encodedText)
+func (gpd *GoPushDeer) request(requestUrl string) error {
 	resp, getErr := http.Get(requestUrl)
 	if getErr != nil {
 		return getErr
@@ -98,4 +96,18 @@ func (gpd *GoPushDeer) sendText(text string) error {
 	}
 
 	return nil
+}
+
+func (gpd *GoPushDeer) SendText(text string) error {
+	base, err := url.Parse(gpd.Server)
+	if err != nil {
+		return err
+	}
+	base.Path += "/message/push"
+	params := url.Values{}
+	params.Add("pushkey", gpd.Key)
+	params.Add("text", text)
+	base.RawQuery = params.Encode()
+
+	return gpd.request(base.String())
 }
