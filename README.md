@@ -29,7 +29,7 @@ import (
 
 func main() {
 	gpd, _ := NewGoPushDeer("key")
-	sendErr := gpd.sendText("hello world")
+	sendErr := gpd.SendText("hello world")
 	if sendErr != nil {
 		fmt.Println(sendErr)
 	}
