@@ -1,6 +1,7 @@
 package gopushdeer
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -11,6 +12,9 @@ func TestBasicSendText(t *testing.T) {
 	assert.NotNil(t, gpd)
 	sendErr := gpd.sendText("hello world")
 	assert.Nil(t, sendErr)
+	sendErr = gpd.sendText("")
+	assert.NotNil(t, sendErr)
+	fmt.Println(sendErr.Error())
 }
 
 func TestServerSendText(t *testing.T) {

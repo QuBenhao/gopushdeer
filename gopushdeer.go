@@ -1,6 +1,7 @@
 package gopushdeer
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -12,6 +13,19 @@ import (
 type GoPushDeer struct {
 	Server string
 	Key    string
+}
+
+type PushDeerResponse struct {
+	Code    int `json:"code"`
+	Content struct {
+		Result []string `json:"result"`
+	} `json:"content"`
+}
+
+type PushDeerResponseResult struct {
+	Counts  int           `json:"counts"`
+	Logs    []interface{} `json:"logs"`
+	Success string        `json:"success"`
 }
 
 func NewGoPushDeer(key string) (*GoPushDeer, error) {
@@ -46,6 +60,10 @@ func (gpd *GoPushDeer) sendText(text string) error {
 	if getErr != nil {
 		return getErr
 	}
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("push deer http response: " + resp.Status)
+	}
+
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -58,6 +76,26 @@ func (gpd *GoPushDeer) sendText(text string) error {
 		return err
 	}
 
-	fmt.Printf("Http Resp: %s\n", body)
+	//fmt.Printf("Http Resp: %s\n", body)
+
+	pdr := PushDeerResponse{}
+	if jsonErr := json.Unmarshal(body, &pdr); jsonErr != nil {
+		return jsonErr
+	}
+	if pdr.Code != 0 {
+		return errors.New(fmt.Sprintf("push deer response code not success: %d", pdr.Code))
+	}
+	if len(pdr.Content.Result) == 0 {
+		return errors.New("push deer response result is empty")
+	}
+
+	result := PushDeerResponseResult{}
+	if jsonErr := json.Unmarshal([]byte(pdr.Content.Result[0]), &result); jsonErr != nil {
+		return jsonErr
+	}
+	if strings.Compare("ok", result.Success) != 0 {
+		return errors.New("push deer response result not ok, " + pdr.Content.Result[0])
+	}
+
 	return nil
 }
